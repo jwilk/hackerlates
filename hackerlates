@@ -31,7 +31,9 @@ def get_json(url, headers=()):
         with io.TextIOWrapper(fp, encoding='UTF-8') as tfp:
             return json.load(tfp)
 
-def dump(user):
+def dump(user, limit=None):
+    if limit is None:
+        limit = 1 << 99
     api_url = 'user/{user}.json'.format(user=urllib.parse.quote(user, safe=''))
     user_data = get_json(api_url)
     submitted = user_data['submitted']
@@ -60,15 +62,19 @@ def dump(user):
             text = '\n'.join('> ' + line for line in text.splitlines())
             print(text)
         print()
+        limit -= 1
+        if limit <= 0:
+            break
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--debug', action='store_true')
+    ap.add_argument('--limit', type=int, metavar='N')
     ap.add_argument('user', metavar='USER')
     options = ap.parse_args()
     if options.debug:
         http.client.HTTPConnection.debuglevel = 1
-    dump(options.user)
+    dump(options.user, limit=options.limit)
 
 if __name__ == '__main__':
     main()
