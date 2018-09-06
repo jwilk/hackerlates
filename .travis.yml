@@ -16,6 +16,7 @@ install:
 - pip install restructuredtext-lint pygments
 script:
 - ./hackerlates --help
+- ./hackerlates --limit 3 jwilk
 - python3 -m pydiatra .
 - python3 -m pyflakes .
 - restructuredtext-lint --encoding=UTF-8 README
