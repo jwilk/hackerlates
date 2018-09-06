@@ -7,6 +7,7 @@
 lambda: (yield from 0)  # Python >= 3.3 is required
 
 import argparse
+import datetime
 import http
 import io
 import json
@@ -42,6 +43,10 @@ def dump(user):
         print(url)
         if post_data.get('deleted'):
             print('<deleted>')
+        ts = post_data.get('time')
+        if ts is not None:
+            ts = datetime.datetime.utcfromtimestamp(ts)
+            print(ts)
         title = post_data.get('title')
         if title:
             print(title)
