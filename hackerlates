@@ -17,7 +17,7 @@ import html2text
 
 base_url = 'https://hacker-news.firebaseio.com/v0/'
 
-user_agent = 'hn-backup (https://github.com/jwilk/hn-backup)'
+user_agent = 'hackerlates (https://github.com/jwilk/hackerlates)'
 
 def get_json(url, headers=()):
     url = urllib.parse.urljoin(base_url, url)
