@@ -68,8 +68,8 @@ def dump(user, limit=None):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--debug', action='store_true')
-    ap.add_argument('--limit', type=int, metavar='N')
+    ap.add_argument('--debug', action='store_true', help=argparse.SUPPRESS)
+    ap.add_argument('--limit', type=int, metavar='N', help=argparse.SUPPRESS)
     ap.add_argument('user', metavar='USER')
     options = ap.parse_args()
     if options.debug:
