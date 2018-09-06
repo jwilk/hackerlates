@@ -31,6 +31,15 @@ def get_json(url, headers=()):
         with io.TextIOWrapper(fp, encoding='UTF-8') as tfp:
             return json.load(tfp)
 
+def quoteline(s):
+    if s:
+        return '> '+ s
+    else:
+        return '>'
+
+def quotelines(s):
+    return '\n'.join(map(quoteline, s.splitlines()))
+
 def dump(user, limit=None):
     if limit is None:
         limit = 1 << 99
@@ -59,7 +68,7 @@ def dump(user, limit=None):
         if text:
             text = html2text.html2text(text, bodywidth=999999)
             text = text.rstrip('\n')
-            text = '\n'.join('> ' + line for line in text.splitlines())
+            text = quotelines(text)
             print(text)
         print()
         limit -= 1
