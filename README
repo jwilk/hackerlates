@@ -1,0 +1,11 @@
+Prerequisites
+=============
+
+* Python ≥ 3.3
+
+* html2text_
+
+.. _html2text:
+   https://pypi.org/project/html2text/
+
+.. vim:ft=rst ts=3 sts=3 sw=3 et
