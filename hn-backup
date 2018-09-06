@@ -42,8 +42,14 @@ def dump(user):
         print(url)
         if post_data.get('deleted'):
             print('<deleted>')
-        else:
-            text = post_data['text']
+        title = post_data.get('title')
+        if title:
+            print(title)
+        story_url = post_data.get('url')
+        if story_url:
+            print(story_url)
+        text = post_data.get('text')
+        if text:
             text = html2text.html2text(text, bodywidth=999999)
             text = text.rstrip('\n')
             text = '\n'.join('> ' + line for line in text.splitlines())
