@@ -1,3 +1,29 @@
+Overview
+========
+
+**hackerlates** makes backup copy of Hacker News submissions and comments::
+
+   $ hackerlates --limit 3 jwilk
+   https://news.ycombinator.com/item?id=17907351
+   2018-09-04 07:54:18
+   > Both names are in use.
+   >
+   > From The Jargon File ([http://www.catb.org/jargon/html/H/Hanlons-Razor.html](http://www.catb.org/jargon/html/H/Hanlons-Razor.html)):
+   >
+   >  _At[http://www.statusq.org/2001/11/26.html](http://www.statusq.org/2001/11/26.html) it is claimed that Hanlon's Razor was coined by one Robert J. Hanlon of Scranton, PA. However, a curiously similar remark (“You have attributed conditions to villainy that simply result from stupidity.”) appears in Logic of Empire, a classic 1941 SF story by Robert A. Heinlein_ […] _._
+
+   https://news.ycombinator.com/item?id=17907267
+   2018-09-04 07:33:20
+   <deleted>
+
+   https://news.ycombinator.com/item?id=17907145
+   2018-09-04 07:01:15
+   > You linked to the reply URL, which works only for logged-in users. Please consider using this instead:
+   >
+   > [https://news.ycombinator.com/item?id=17904921](https://news.ycombinator.com/item?id=17904921)
+
+   ⋮
+
 Prerequisites
 =============
 
