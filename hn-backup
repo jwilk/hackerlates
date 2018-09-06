@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+# encoding=UTF-8
+
+# Copyright © 2016-2018 Jakub Wilk <jwilk@jwilk.net>
+# SPDX-License-Identifier: MIT
+
+lambda: (yield from 0)  # Python >= 3.3 is required
+
+import argparse
+import http
+import io
+import json
+import urllib.parse
+import urllib.request
+
+import html2text
+
+base_url = 'https://hacker-news.firebaseio.com/v0/'
+
+user_agent = 'hn-backup (https://github.com/jwilk/hn-backup)'
+
+def get_json(url, headers=()):
+    url = urllib.parse.urljoin(base_url, url)
+    headers = dict(headers)
+    headers.update({
+        'User-Agent': user_agent,
+    })
+    request = urllib.request.Request(url, headers=headers)
+    with urllib.request.urlopen(request, cadefault=True) as fp:
+        with io.TextIOWrapper(fp, encoding='UTF-8') as tfp:
+            return json.load(tfp)
+
+def dump(user):
+    api_url = 'user/{user}.json'.format(user=urllib.parse.quote(user, safe=''))
+    user_data = get_json(api_url)
+    submitted = user_data['submitted']
+    for n in submitted:
+        n = int(n)
+        api_url = 'item/{0}.json'.format(n)
+        post_data = get_json(api_url)
+        url = 'https://news.ycombinator.com/item?id={0}'.format(n)
+        print(url)
+        if post_data.get('deleted'):
+            print('<deleted>')
+        else:
+            text = post_data['text']
+            text = html2text.html2text(text, bodywidth=999999)
+            text = text.rstrip('\n')
+            text = '\n'.join('> ' + line for line in text.splitlines())
+            print(text)
+        print()
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--debug', action='store_true')
+    ap.add_argument('user', metavar='USER')
+    options = ap.parse_args()
+    if options.debug:
+        http.client.HTTPConnection.debuglevel = 1
+    dump(options.user)
+
+if __name__ == '__main__':
+    main()
+
+# vim:ts=4 sts=4 sw=4 et
