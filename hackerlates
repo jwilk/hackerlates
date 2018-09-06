@@ -43,12 +43,12 @@ def dump(user, limit=None):
         post_data = get_json(api_url)
         url = 'https://news.ycombinator.com/item?id={0}'.format(n)
         print(url)
-        if post_data.get('deleted'):
-            print('<deleted>')
         ts = post_data.get('time')
         if ts is not None:
             ts = datetime.datetime.utcfromtimestamp(ts)
             print(ts)
+        if post_data.get('deleted'):
+            print('<deleted>')
         title = post_data.get('title')
         if title:
             print(title)
