@@ -11,9 +11,9 @@ before_install:
 - pyflakes=pyflakes
 - if [[ $TRAVIS_PYTHON_VERSION = 3.3 ]]; then pyflakes='pyflakes<2'; fi
 install:
-- pip install html2text
-- pip install pydiatra $pyflakes
-- pip install restructuredtext-lint pygments
+- python3 -m pip install html2text
+- python3 -m pip install pydiatra $pyflakes
+- python3 -m pip install restructuredtext-lint pygments
 script:
 - ./hackerlates --help
 - ./hackerlates --limit 3 jwilk
