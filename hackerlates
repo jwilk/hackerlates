@@ -4,8 +4,6 @@
 # Copyright © 2016-2018 Jakub Wilk <jwilk@jwilk.net>
 # SPDX-License-Identifier: MIT
 
-lambda: (yield from 0)  # Python >= 3.3 is required
-
 import argparse
 import datetime
 import http
@@ -16,6 +14,8 @@ import urllib.parse
 import urllib.request
 
 import html2text
+
+lambda: (yield from 0)  # Python >= 3.3 is required
 
 base_url = 'https://hacker-news.firebaseio.com/v0/'
 
