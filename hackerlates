@@ -17,7 +17,7 @@ import urllib.request
 
 import html2text
 
-lambda: (yield from 0)  # Python >= 3.3 is required
+type(lambda: (yield from []))  # Python >= 3.3 is required
 
 base_url = 'https://hacker-news.firebaseio.com/v0/'
 
