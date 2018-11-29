@@ -98,8 +98,7 @@ def get_json(url, headers=()):
 def quoteline(s):
     if s:
         return '> '+ s
-    else:
-        return '>'
+    return '>'
 
 def quotelines(s):
     return '\n'.join(map(quoteline, s.splitlines()))
