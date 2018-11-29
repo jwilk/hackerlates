@@ -6,9 +6,11 @@
 
 import argparse
 import datetime
+import fcntl
 import http
 import io
 import json
+import os
 import sys
 import urllib.parse
 import urllib.request
@@ -20,6 +22,64 @@ lambda: (yield from 0)  # Python >= 3.3 is required
 base_url = 'https://hacker-news.firebaseio.com/v0/'
 
 user_agent = 'hackerlates (https://github.com/jwilk/hackerlates)'
+
+prog = os.path.basename(sys.argv[0])
+
+class Cache():
+
+    @staticmethod
+    def _create_cache_dir():
+        path = os.getenv('XDG_CACHE_HOME', '')
+        if not path.startswith('/'):
+            path = os.path.join(os.path.expanduser('~'), '.cache')
+        path = os.path.join(path, 'hackerlates')
+        os.makedirs(path, 0o700, exist_ok=True)
+        return path
+
+    def __init__(self):
+        self.dir = self._create_cache_dir()
+        self.path = os.path.join(self.dir, 'cache.json')
+        self.data = None
+        self.lock_fd = None
+
+    def __enter__(self):
+        if self.lock_fd is not None:
+            raise RuntimeError('{self!r} is already locked'.format(self=self))
+        self.lock_fd = os.open(self.dir, os.O_RDONLY)
+        try:
+            fcntl.flock(self.lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            print('{prog}: waiting for the lock...'.format(prog=prog), end='', file=sys.stderr)
+            sys.stderr.flush()
+            fcntl.flock(self.lock_fd, fcntl.LOCK_EX)
+            print('', file=sys.stderr)
+        initial_data = {'__version__': 0}
+        try:
+            with open(self.path, 'rt', encoding='UTF-8') as fp:
+                self.data = json.load(fp)
+        except FileNotFoundError:
+            self.data = {}
+        if self.data.get('__version__') != initial_data['__version__']:
+            self.data = initial_data
+        return self
+
+    def __getitem__(self, key):
+        return self.data[key]
+
+    def __setitem__(self, key, value):
+        self.data[key] = value
+
+    def __exit__(self, *exc_info):
+        if self.lock_fd is None:
+            return
+        try:
+            with open(self.path + '.tmp', 'wt', encoding='UTF-8') as fp:
+                json.dump(self.data, fp)
+            os.rename(self.path + '.tmp', self.path)
+            self.data = None
+        finally:
+            os.close(self.lock_fd)
+            os.lock_fd = None
 
 def get_json(url, headers=()):
     url = urllib.parse.urljoin(base_url, url)
@@ -44,22 +104,28 @@ def quoteline(s):
 def quotelines(s):
     return '\n'.join(map(quoteline, s.splitlines()))
 
-def dump(user, limit=None):
+def dump(user, *, cache, limit=None):
     if limit is None:
         limit = 1 << 99
     api_url = 'user/{user}.json'.format(user=urllib.parse.quote(user, safe=''))
     user_data = get_json(api_url)
     submitted = user_data['submitted']
+    now = datetime.datetime.utcnow()
     for n in submitted:
         n = int(n)
         api_url = 'item/{0}.json'.format(n)
-        post_data = get_json(api_url)
+        try:
+            post_data = cache[api_url]
+        except KeyError:
+            post_data = get_json(api_url)
         url = 'https://news.ycombinator.com/item?id={0}'.format(n)
         print(url)
         ts = post_data.get('time')
         if ts is not None:
             ts = datetime.datetime.utcfromtimestamp(ts)
             print(ts)
+            if now - ts > datetime.timedelta(seconds=(2 * 60 * 60)):  # 2 hours
+                cache[api_url] = post_data
         if post_data.get('deleted'):
             print('<deleted>')
         title = post_data.get('title')
@@ -87,7 +153,8 @@ def main():
     options = ap.parse_args()
     if options.debug:
         http.client.HTTPConnection.debuglevel = 1
-    dump(options.user, limit=options.limit)
+    with Cache() as cache:
+        dump(options.user, limit=options.limit, cache=cache)
 
 if __name__ == '__main__':
     main()
