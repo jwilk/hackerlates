@@ -12,7 +12,7 @@ jobs:
   - python: "3.9-dev"
 before_install:
 - pyflakes=pyflakes
-- if [[ $TRAVIS_PYTHON_VERSION = 3.3 ]]; then pyflakes='pyflakes<2'; fi
+- if [[ $TRAVIS_PYTHON_VERSION = 3.3 ]]; then pyflakes+='<2'; fi
 - html2text=html2text
 - if [[ $TRAVIS_PYTHON_VERSION = 3.3 ]]; then html2text+='<2019.9.26'; fi
 install:
