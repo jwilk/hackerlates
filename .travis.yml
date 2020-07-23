@@ -13,8 +13,10 @@ jobs:
 before_install:
 - pyflakes=pyflakes
 - if [[ $TRAVIS_PYTHON_VERSION = 3.3 ]]; then pyflakes='pyflakes<2'; fi
+- html2text=html2text
+- if [[ $TRAVIS_PYTHON_VERSION = 3.3 ]]; then html2text+='<2019.9.26'; fi
 install:
-- python3 -m pip install html2text
+- python3 -m pip install $html2text
 - python3 -m pip install pydiatra $pyflakes
 - python3 -m pip install restructuredtext-lint pygments
 script:
