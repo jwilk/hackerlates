@@ -2,22 +2,15 @@ dist: xenial
 language: python
 jobs:
   include:
-  - python: "3.3"
-    dist: trusty
   - python: "3.4"
   - python: "3.5"
   - python: "3.6"
   - python: "3.7"
   - python: "3.8"
   - python: "3.9-dev"
-before_install:
-- pyflakes=pyflakes
-- if [[ $TRAVIS_PYTHON_VERSION = 3.3 ]]; then pyflakes+='<2'; fi
-- html2text=html2text
-- if [[ $TRAVIS_PYTHON_VERSION = 3.3 ]]; then html2text+='<2019.9.26'; fi
 install:
-- python3 -m pip install $html2text
-- python3 -m pip install pydiatra $pyflakes
+- python3 -m pip install html2text
+- python3 -m pip install pydiatra pyflakes
 - python3 -m pip install restructuredtext-lint pygments
 script:
 - ./hackerlates --help
