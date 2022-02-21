@@ -18,8 +18,7 @@ import urllib.request
 
 import html2text
 
-if sys.version_info < (3, 4, 3):
-    raise RuntimeError('Python >= 3.4.3 is required')
+0_0  # Python >= 3.6 is required
 
 base_url = 'https://hacker-news.firebaseio.com/v0/'
 
