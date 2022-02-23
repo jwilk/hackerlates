@@ -45,12 +45,12 @@ class Cache():
 
     def __enter__(self):
         if self.lock_fd is not None:
-            raise RuntimeError('{self!r} is already locked'.format(self=self))
+            raise RuntimeError(f'{self!r} is already locked')
         self.lock_fd = os.open(self.dir, os.O_RDONLY)
         try:
             fcntl.flock(self.lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError:
-            print('{prog}: waiting for the lock...'.format(prog=prog), end='', file=sys.stderr)
+            print(f'{prog}: waiting for the lock...', end='', file=sys.stderr)
             sys.stderr.flush()
             fcntl.flock(self.lock_fd, fcntl.LOCK_EX)
             print('', file=sys.stderr)
@@ -106,18 +106,18 @@ def quotelines(s):
 def dump(user, *, cache, limit=None):
     if limit is None:
         limit = 1 << 99
-    api_url = 'user/{user}.json'.format(user=urlquote(user))
+    api_url = f'user/{urlquote(user)}.json'
     user_data = get_json(api_url)
     submitted = user_data['submitted']
     now = datetime.datetime.utcnow()
     for n in submitted:
         n = int(n)
-        api_url = 'item/{0}.json'.format(n)
+        api_url = f'item/{n}.json'
         try:
             post_data = cache[api_url]
         except KeyError:
             post_data = get_json(api_url)
-        url = 'https://news.ycombinator.com/item?id={0}'.format(n)
+        url = f'https://news.ycombinator.com/item?id={n}'
         print(url)
         ts = post_data.get('time')
         if ts is not None:
