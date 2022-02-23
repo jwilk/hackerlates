@@ -7,6 +7,7 @@
 import argparse
 import datetime
 import fcntl
+import functools
 import http
 import io
 import json
@@ -93,6 +94,8 @@ def get_json(url, headers=()):
         with io.TextIOWrapper(fp, encoding='UTF-8') as tfp:
             return json.load(tfp)
 
+urlquote = functools.partial(urllib.parse.quote, safe='')
+
 def quoteline(s):
     if s:
         return '> '+ s
@@ -104,7 +107,7 @@ def quotelines(s):
 def dump(user, *, cache, limit=None):
     if limit is None:
         limit = 1 << 99
-    api_url = 'user/{user}.json'.format(user=urllib.parse.quote(user, safe=''))
+    api_url = 'user/{user}.json'.format(user=urlquote(user))
     user_data = get_json(api_url)
     submitted = user_data['submitted']
     now = datetime.datetime.utcnow()
