@@ -103,6 +103,12 @@ def quoteline(s):
 def quotelines(s):
     return '\n'.join(map(quoteline, s.splitlines()))
 
+def html2md(text):
+    cvtr = html2text.HTML2Text()
+    cvtr.unicode_snob = True
+    cvtr.body_width = 999999
+    return cvtr.handle(text)
+
 def dump(user, *, cache, limit=None):
     if limit is None:
         limit = 1 << 99
@@ -135,7 +141,7 @@ def dump(user, *, cache, limit=None):
             print(story_url)
         text = post_data.get('text')
         if text:
-            text = html2text.html2text(text, bodywidth=999999)
+            text = html2md(text)
             text = text.rstrip('\n')
             text = quotelines(text)
             print(text)
