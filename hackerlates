@@ -22,8 +22,6 @@ import html2text
 
 base_url = 'https://hacker-news.firebaseio.com/v0/'
 
-user_agent = 'hackerlates (https://github.com/jwilk/hackerlates)'
-
 prog = os.path.basename(sys.argv[0])
 
 class Cache():
@@ -82,16 +80,23 @@ class Cache():
             os.close(self.lock_fd)
             os.lock_fd = None
 
-def get_json(url, headers=()):
-    url = urllib.parse.urljoin(base_url, url)
-    headers = dict(headers)
-    headers.update({
-        'User-Agent': user_agent,
-    })
-    request = urllib.request.Request(url, headers=headers)
-    with urllib.request.urlopen(request) as fp:
-        with io.TextIOWrapper(fp, encoding='UTF-8') as tfp:
-            return json.load(tfp)
+class UserAgent():
+
+    name = 'hackerlates (https://github.com/jwilk/hackerlates)'
+
+    @classmethod
+    def get_json(cls, url, headers=()):
+        url = urllib.parse.urljoin(base_url, url)
+        headers = dict(headers)
+        headers.update({
+            'User-Agent': cls.name,
+        })
+        request = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(request) as fp:
+            with io.TextIOWrapper(fp, encoding='UTF-8') as tfp:
+                return json.load(tfp)
+
+get_json = UserAgent.get_json
 
 urlquote = functools.partial(urllib.parse.quote, safe='')
 
