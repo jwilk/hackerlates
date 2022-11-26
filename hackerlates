@@ -84,14 +84,14 @@ class UserAgent():
     headers = {
         'User-Agent': 'hackerlates (https://github.com/jwilk/hackerlates)'
     }
-    debuglevel = 0
+    debug_level = 0
 
     @classmethod
     def _build_opener(cls):
         # TODO: Get rid of this function once
         # <https://github.com/python/cpython/issues/99352> is fixed.
         handlers = [
-            Handler(cls.debuglevel)
+            Handler(debuglevel=cls.debug_level)
             for Handler in [urllib.request.HTTPHandler, urllib.request.HTTPSHandler]
         ]
         return urllib.request.build_opener(*handlers)
@@ -177,7 +177,7 @@ def main():
     ap.add_argument('user', metavar='USER')
     options = ap.parse_args()
     if options.debug:
-        UserAgent.debuglevel = 1
+        UserAgent.debug_level = 1
     with Cache() as cache:
         dump(options.user, limit=options.limit, cache=cache)
 
