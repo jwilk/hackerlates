@@ -101,7 +101,7 @@ def quoteline(s):
     return '>'
 
 def quotelines(s):
-    return '\n'.join(map(quoteline, s.splitlines()))
+    return str.join('\n', map(quoteline, s.splitlines()))
 
 def html2md(text):
     cvtr = html2text.HTML2Text()
