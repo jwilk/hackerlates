@@ -81,7 +81,9 @@ class Cache():
 
 class UserAgent():
 
-    name = 'hackerlates (https://github.com/jwilk/hackerlates)'
+    headers = {
+        'User-Agent': 'hackerlates (https://github.com/jwilk/hackerlates)'
+    }
     debuglevel = 0
 
     @classmethod
@@ -96,9 +98,7 @@ class UserAgent():
     def get_json(cls, url, headers=()):
         url = urllib.parse.urljoin(base_url, url)
         headers = dict(headers)
-        headers.update({
-            'User-Agent': cls.name,
-        })
+        headers.update(cls.headers)
         request = urllib.request.Request(url, headers=headers)
         opener = cls.build_opener()
         sys.stdout = sys.__stderr__
