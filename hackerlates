@@ -88,6 +88,8 @@ class UserAgent():
 
     @classmethod
     def _build_opener(cls):
+        # TODO: Get rid of this function once
+        # <https://github.com/python/cpython/issues/99352> is fixed.
         handlers = [
             Handler(cls.debuglevel)
             for Handler in [urllib.request.HTTPHandler, urllib.request.HTTPSHandler]
