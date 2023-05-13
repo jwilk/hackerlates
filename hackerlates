@@ -132,6 +132,14 @@ def html2md(text):
     cvtr.body_width = 999999
     return cvtr.handle(text)
 
+def fmt_datetime(dt):
+    s = str(dt)
+    if s[-6:] == '+00:00':
+        # unknown local offset convention
+        # https://datatracker.ietf.org/doc/html/rfc3339#section-4.3
+        s = f'{s[:-6]}-00:00'
+    return s
+
 def dump(user, *, cache, limit=None):
     if limit is None:
         limit = 1 << 99
@@ -151,7 +159,7 @@ def dump(user, *, cache, limit=None):
         ts = post_data.get('time')
         if ts is not None:
             ts = datetime.datetime.fromtimestamp(ts, tz=datetime.UTC)
-            print(ts)
+            print(fmt_datetime(ts))
             if now - ts > datetime.timedelta(seconds=(2 * 60 * 60)):  # 2 hours
                 cache[api_url] = post_data
         if post_data.get('deleted'):
