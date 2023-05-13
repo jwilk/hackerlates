@@ -19,6 +19,9 @@ import html2text
 
 0_0  # Python >= 3.6 is required
 
+if sys.version_info < (3, 11):
+    datetime.UTC = datetime.timezone.utc
+
 base_url = 'https://hacker-news.firebaseio.com/v0/'
 
 prog = os.path.basename(sys.argv[0])
@@ -135,7 +138,7 @@ def dump(user, *, cache, limit=None):
     api_url = f'user/{urlquote(user)}.json'
     user_data = get_json(api_url)
     submitted = user_data['submitted']
-    now = datetime.datetime.utcnow()
+    now = datetime.datetime.now(tz=datetime.UTC)
     for n in submitted:
         n = int(n)
         api_url = f'item/{n}.json'
@@ -147,7 +150,7 @@ def dump(user, *, cache, limit=None):
         print(url)
         ts = post_data.get('time')
         if ts is not None:
-            ts = datetime.datetime.utcfromtimestamp(ts)
+            ts = datetime.datetime.fromtimestamp(ts, tz=datetime.UTC)
             print(ts)
             if now - ts > datetime.timedelta(seconds=(2 * 60 * 60)):  # 2 hours
                 cache[api_url] = post_data
