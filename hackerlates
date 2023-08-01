@@ -136,7 +136,7 @@ def fmt_datetime(dt):
     s = str(dt)
     if s[-6:] == '+00:00':
         # unknown local offset convention
-        # https://datatracker.ietf.org/doc/html/rfc3339#section-4.3
+        # https://www.rfc-editor.org/rfc/rfc3339.html#section-4.3
         s = f'{s[:-6]}-00:00'
     return s
 
