@@ -42,7 +42,7 @@ def makedirs700(path):
         if not os.path.isdir(path):
             raise
 
-class Cache():
+class Cache:
 
     @staticmethod
     def _create_cache_dir():
@@ -98,7 +98,7 @@ class Cache():
             os.close(self.lock_fd)
             os.lock_fd = None
 
-class UserAgent():
+class UserAgent:
 
     headers = {
         'User-Agent': 'hackerlates (https://github.com/jwilk/hackerlates)'
