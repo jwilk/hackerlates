@@ -11,6 +11,7 @@ import functools
 import io
 import json
 import os
+import sqlite3
 import sys
 import urllib.parse
 import urllib.request
@@ -42,6 +43,8 @@ def makedirs700(path):
         if not os.path.isdir(path):
             raise
 
+serialize_json = functools.partial(json.dumps, separators=(',', ':'))
+
 class Cache:
 
     @staticmethod
@@ -55,48 +58,76 @@ class Cache:
 
     def __init__(self):
         self.dir = self._create_cache_dir()
-        self.path = os.path.join(self.dir, 'cache.json')
-        self.data = None
-        self.lock_fd = None
+        self.conn = None
 
     def __enter__(self):
-        if self.lock_fd is not None:
-            raise RuntimeError(f'{self!r} is already locked')
-        self.lock_fd = os.open(self.dir, os.O_RDONLY)
+        db_path = os.path.join(self.dir, 'cache.db')
+        conn = self.conn = sqlite3.connect(db_path)
+        with conn:
+            conn.execute('''
+                CREATE TABLE IF NOT EXISTS data (
+                    key TEXT PRIMARY KEY NOT NULL,
+                    value TEXT NOT NULL,
+                    timestamp TIMESTAMP
+                )'''
+            )
+        # TODO for 2027: remove the JSON -> SQLite migration code
+        json_path = os.path.join(self.dir, 'cache.json')
+        lock_fd = os.open(self.dir, os.O_RDONLY)
         try:
-            fcntl.flock(self.lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except BlockingIOError:
-            print(f'{prog}: waiting for the lock...', end='', file=sys.stderr)
-            sys.stderr.flush()
-            fcntl.flock(self.lock_fd, fcntl.LOCK_EX)
-            print('', file=sys.stderr)
-        initial_data = {'__version__': 0}
-        try:
-            with open(self.path, 'rt', encoding='UTF-8') as fp:
-                self.data = json.load(fp)
-        except FileNotFoundError:
-            self.data = {}
-        if self.data.get('__version__') != initial_data['__version__']:
-            self.data = initial_data
+            try:
+                fcntl.flock(lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError:
+                print(f'{prog}: waiting for the lock...', end='', file=sys.stderr)
+                sys.stderr.flush()
+                fcntl.flock(lock_fd, fcntl.LOCK_EX)
+                print('', file=sys.stderr)
+            try:
+                with open(json_path, 'rt', encoding='UTF-8') as fp:
+                    data = json.load(fp)
+            except FileNotFoundError:
+                data = None
+            if data:
+                if data.pop('__version__') != 0:
+                    data = {}
+                data = [
+                    (key, serialize_json(value))
+                    for key, value in data.items()
+                ]
+                with conn:
+                    conn.executemany('''
+                        INSERT OR IGNORE INTO data(key, value)
+                        VALUES(?, ?)''',
+                        data
+                    )
+            if data is not None:
+                os.unlink(json_path)
+        finally:
+            os.close(lock_fd)
         return self
 
     def __getitem__(self, key):
-        return self.data[key]
+        with self.conn as conn:
+            cur = conn.execute('SELECT value FROM data WHERE key = ?', [key])
+            row = cur.fetchone()
+            if row is None:
+                raise KeyError
+            [value] = row
+            value = json.loads(value)
+            return value
 
     def __setitem__(self, key, value):
-        self.data[key] = value
+        value = serialize_json(value)
+        with self.conn as conn:
+            conn.execute('''
+                INSERT OR IGNORE INTO data(key, value, timestamp)
+                VALUES (?, ?, DATETIME("now"))''',
+                (key, value)
+             )
 
     def __exit__(self, *exc_info):
-        if self.lock_fd is None:
-            return
-        try:
-            with open(self.path + '.tmp', 'wt', encoding='UTF-8') as fp:
-                json.dump(self.data, fp)
-            os.rename(self.path + '.tmp', self.path)
-            self.data = None
-        finally:
-            os.close(self.lock_fd)
-            os.lock_fd = None
+        self.conn.close()
+        self.conn = None
 
 class UserAgent:
 
