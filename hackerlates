@@ -232,6 +232,7 @@ def dump(user, *, cache, limit=None):
 
 def main():
     ap = argparse.ArgumentParser()
+    ap.color = False
     ap.add_argument('--debug', action='store_true', help=argparse.SUPPRESS)
     ap.add_argument('--limit', type=int, metavar='N', help=argparse.SUPPRESS)
     ap.add_argument('user', metavar='USER')
